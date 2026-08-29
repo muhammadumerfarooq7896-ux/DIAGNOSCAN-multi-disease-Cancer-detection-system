@@ -168,9 +168,7 @@ This project exists to demonstrate applied machine learning engineering — tran
 
 ---
 
-## 📌 Notes for Reviewers
 
-If you're looking at this as a portfolio piece: the interesting engineering here isn't any single model — it's the **pipeline discipline**. Three separate training notebooks producing standardized, self-describing checkpoint files (weights + class names bundled together), loaded through a single unified inference engine, feeding a carefully constrained LLM prompt that had to be explicitly engineered *not* to sound like a diagnosis. That constraint — getting an LLM to be genuinely useful without overstepping into something irresponsible — was the harder design problem than the CNNs themselves.
 
 ---
 
