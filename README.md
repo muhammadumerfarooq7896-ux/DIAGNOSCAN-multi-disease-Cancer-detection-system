@@ -9,7 +9,7 @@ Diagnoscan is an end-to-end deep learning system that analyzes medical images ac
 This isn't a single model wearing three hats. It's three independently trained computer vision pipelines, unified under one architecture, talking to a language model that translates machine confidence into human language.
 check out the demo here  https://youtu.be/GGOZN8LQyVs
 
-![Project Demo](images/demo.mp4)
+![Project Demo](images/demo.gif)
 ---
 
 ## ⚡ What It Actually Does
