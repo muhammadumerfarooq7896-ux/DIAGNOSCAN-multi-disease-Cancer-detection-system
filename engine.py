@@ -17,7 +17,7 @@ from google import genai
 # Setup
 # ---------------------------------------------------------------------------
 
-load_dotenv()  # reads GEMINI_API_KEY from a .env file in the project root
+load_dotenv()  # reads GEMINI_API_KEY (and HF_TOKEN) from a .env file in the project root
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
@@ -30,6 +30,29 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 GEMINI_MODEL_NAME = "gemini-2.5-flash-lite"
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+# --- Deployment note ---
+# The three trained checkpoints (brain_tumor_model.pt, lung_cancer_model.pt,
+# skin_cancer_model.pt) are too large to commit to GitHub. They're uploaded once
+# to a HuggingFace Hub model repo, and downloaded automatically here the first
+# time each is needed if not already present locally. If a file already exists
+# on disk (e.g. running locally with the models/ folder populated), it's used
+# as-is with no download.
+HF_MODELS_REPO = os.getenv("DIAGNOSCAN_MODELS_REPO", "toughfigure/diagnoscan-models")
+
+
+def _ensure_model_present(local_path: str) -> str:
+    if os.path.exists(local_path):
+        return local_path
+    from huggingface_hub import hf_hub_download
+    filename = os.path.basename(local_path)  # e.g. "brain_tumor_model.pt"
+    downloaded_path = hf_hub_download(
+        repo_id=HF_MODELS_REPO,
+        filename=filename,
+        token=os.getenv("HF_TOKEN"),
+    )
+    return downloaded_path
+
 
 MODEL_CONFIG = {
     "Brain Tumor (MRI)": {
@@ -89,7 +112,8 @@ def load_model(disease_key: str):
         return _model_cache[disease_key]
 
     config = MODEL_CONFIG[disease_key]
-    checkpoint = torch.load(config["path"], map_location=DEVICE)
+    resolved_path = _ensure_model_present(config["path"])  # <-- downloads if missing
+    checkpoint = torch.load(resolved_path, map_location=DEVICE)
     class_names = checkpoint["class_names"]
 
     model = models.resnet50(weights=None)
